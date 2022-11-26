@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+    BeforeInsert,
+    Column,
+    Entity,
+    ManyToOne,
+    PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
 
 @Entity()
@@ -13,8 +19,13 @@ export class Post {
     content: string;
 
     @Column('date')
-    lastUpdated;
+    lastUpdated: Date;
 
-    @ManyToOne(() => User, (user) => user.posts)
+    @ManyToOne(() => User, (user) => user.posts, { eager: true })
     user: User;
+
+    @BeforeInsert()
+    nullValues() {
+        this.lastUpdated = new Date();
+    }
 }
