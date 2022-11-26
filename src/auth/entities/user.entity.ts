@@ -1,10 +1,22 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Post } from '../../posts/entities/post.entity';
+import { Post } from 'src/posts/entities/post.entity';
 
 @Entity()
 export class User {
     @PrimaryGeneratedColumn('uuid')
     id_user: string;
+
+    @Column('text', {
+        array: true,
+        default: ['user'],
+    })
+    roles: string[];
+
+    @Column('bool')
+    isBanned: boolean;
+
+    @Column('bool')
+    isActive: boolean;
 
     @Column('text')
     name: string;
@@ -23,9 +35,6 @@ export class User {
 
     @Column('text')
     profilePhoto: string;
-
-    @Column('boolean')
-    banned: boolean;
 
     @OneToMany(() => Post, (post) => post.user)
     posts: Post[];
