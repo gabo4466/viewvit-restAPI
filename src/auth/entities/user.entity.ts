@@ -1,4 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+    BeforeInsert,
+    BeforeUpdate,
+    Column,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Post } from 'src/posts/entities/post.entity';
 
 @Entity()
@@ -47,4 +54,10 @@ export class User {
 
     @OneToMany(() => Post, (post) => post.user)
     posts: Post[];
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    checkFields() {
+        this.email = this.email.toLowerCase().trim();
+    }
 }

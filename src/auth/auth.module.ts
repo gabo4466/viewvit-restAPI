@@ -25,7 +25,7 @@ import { User } from './entities/user.entity';
                 return {
                     secret: process.env.JWT_SECRET,
                     signOptions: {
-                        expiresIn: '2h',
+                        expiresIn: '12h',
                     },
                 };
             },
