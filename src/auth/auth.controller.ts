@@ -6,14 +6,12 @@ import {
     UseGuards,
     SetMetadata,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
+import { Auth } from './decorators';
 import { GetUser } from './decorators/get-user.decorator';
 import { LoginUserDto, CreateUserDto } from './dto';
-import { UserRoleGuard } from './guards/user-role.guard';
 import { User } from './entities/user.entity';
-import { RoleProtected } from './decorators/role-protected.decorator';
-import { ValidRoles } from './interfaces';
+import { ValidRoles } from './interfaces/valid-roles.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -30,7 +28,8 @@ export class AuthController {
     }
 
     @Get('profile')
-    @RoleProtected(ValidRoles.user)
-    @UseGuards(AuthGuard(), UserRoleGuard)
-    getProfile(@GetUser() user: User) {}
+    @Auth(ValidRoles.admin)
+    getProfile(@GetUser() user: User) {
+        return 'hola mundo';
+    }
 }
