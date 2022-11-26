@@ -12,10 +12,14 @@ export class User {
     })
     roles: string[];
 
-    @Column('bool')
+    @Column('bool', {
+        default: false,
+    })
     isBanned: boolean;
 
-    @Column('bool')
+    @Column('bool', {
+        default: true,
+    })
     isActive: boolean;
 
     @Column('text')
@@ -33,7 +37,10 @@ export class User {
     @Column('date')
     birthday: Date;
 
-    @Column('text')
+    // TODO: Define default profile photo
+    @Column('text', {
+        default: '',
+    })
     profilePhoto: string;
 
     @OneToMany(() => Post, (post) => post.user)
