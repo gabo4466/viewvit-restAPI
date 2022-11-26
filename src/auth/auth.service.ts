@@ -37,9 +37,6 @@ export class AuthService {
                 ...user,
                 token: this.getJwtToken({
                     id_user: user.id_user,
-                    email: user.email,
-                    name: user.name,
-                    nickname: user.nickname,
                 }),
             };
         } catch (error) {
@@ -54,6 +51,7 @@ export class AuthService {
             select: {
                 email: true,
                 password: true,
+                id_user: true,
             },
         });
 
@@ -65,9 +63,6 @@ export class AuthService {
             ...user,
             token: this.getJwtToken({
                 id_user: user.id_user,
-                email: user.email,
-                name: user.name,
-                nickname: user.nickname,
             }),
         };
     }
