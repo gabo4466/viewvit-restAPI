@@ -14,7 +14,7 @@ import { User } from 'src/auth/entities/user.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { isUUID } from 'class-validator';
 import { UnauthorizedException } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
+import { handleDBErrors } from 'src/common/helpers/handle-db-errors.helper';
 
 @Injectable()
 export class PostsService {
@@ -39,7 +39,7 @@ export class PostsService {
 
             return { ...product };
         } catch (error) {
-            this.handleDBExceptions(error);
+            handleDBErrors(error, this.logger);
         }
     }
 
@@ -176,18 +176,7 @@ export class PostsService {
         } catch (error) {
             await queryRunner.rollbackTransaction();
             await queryRunner.release();
-            this.handleDBExceptions(error);
+            handleDBErrors(error, this.logger);
         }
-    }
-
-    private handleDBExceptions(error: any) {
-        if (error.code === '23505') {
-            throw new BadRequestException(error.detail);
-        }
-
-        this.logger.error(error);
-        throw new InternalServerErrorException(
-            'Unexpected error, check server logs',
-        );
     }
 }
