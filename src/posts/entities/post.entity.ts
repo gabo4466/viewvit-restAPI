@@ -1,8 +1,10 @@
+import { Comment } from 'src/comments/entities/comment.entity';
 import {
     BeforeInsert,
     Column,
     Entity,
     ManyToOne,
+    OneToMany,
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
@@ -28,6 +30,9 @@ export class Post {
 
     @ManyToOne(() => User, (user) => user.posts, { eager: true })
     user: User;
+
+    @OneToMany(() => Comment, (comment) => comment)
+    comments: Comment[];
 
     @BeforeInsert()
     nullValues() {
