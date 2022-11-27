@@ -10,16 +10,17 @@ import {
 } from 'class-validator';
 
 export class UpdateAccountDto {
+    @IsOptional()
     @IsString()
     @MinLength(2)
-    @IsOptional()
-    name: string;
+    name?: string;
 
+    @IsOptional()
     @IsString()
     @MinLength(4)
-    @IsOptional()
-    nickname: string;
+    nickname?: string;
 
+    @IsOptional()
     @IsString()
     @MinLength(6)
     @MaxLength(50)
@@ -27,16 +28,15 @@ export class UpdateAccountDto {
         message:
             'The password must have a Uppercase, lowercase letter and a number',
     })
-    @IsOptional()
-    password: string;
+    password?: string;
 
+    @IsOptional()
     @IsString()
     @IsEmail()
-    @IsOptional()
-    email: string;
+    email?: string;
 
+    @IsOptional()
     @Type(() => Date)
     @IsDate()
-    @IsOptional()
-    birthday: Date;
+    birthday?: Date;
 }

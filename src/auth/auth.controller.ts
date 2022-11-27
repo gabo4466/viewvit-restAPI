@@ -28,10 +28,12 @@ export class AuthController {
         return this.authService.login(loginUserDto);
     }
 
-    // TODO: Update account (including sensible data)
     @Patch()
     @Auth()
-    updateAccount(updateAccountDto: UpdateAccountDto, @GetUser() user: User) {
+    updateAccount(
+        @Body() updateAccountDto: UpdateAccountDto,
+        @GetUser() user: User,
+    ) {
         return this.authService.updateAccount(updateAccountDto, user);
     }
 

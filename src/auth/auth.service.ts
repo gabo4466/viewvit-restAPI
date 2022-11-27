@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { LoginUserDto, CreateUserDto, UpdateAccountDto } from './dto';
 
@@ -22,6 +22,7 @@ export class AuthService {
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
         private readonly jwtService: JwtService,
+        private readonly dataSource: DataSource,
     ) {}
 
     async create(createUserDto: CreateUserDto) {
@@ -67,7 +68,40 @@ export class AuthService {
         };
     }
 
-    async updateAccount(updateAccountDto: UpdateAccountDto, user: User) {}
+    async updateAccount(updateAccountDto: UpdateAccountDto, user: User) {
+        let userUpdate = {
+            id_user: user.id_user,
+            ...updateAccountDto,
+        };
+
+        if (userUpdate.password) {
+            userUpdate.password = bcrypt.hashSync(userUpdate.password, 10);
+        }
+
+        console.log({ userUpdate });
+
+        const userToUpdate = await this.userRepository.preload(userUpdate);
+
+        if (!userToUpdate) {
+            throw new InternalServerErrorException(`Something went wrong`);
+        }
+        // Create query runner
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            await queryRunner.manager.save(userToUpdate);
+            await queryRunner.commitTransaction();
+            await queryRunner.release();
+
+            return { userToUpdate };
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            await queryRunner.release();
+            this.handleDBErrors(error);
+        }
+    }
 
     private getJwtToken(payload: JwtPayload) {
         const token = this.jwtService.sign(payload);
