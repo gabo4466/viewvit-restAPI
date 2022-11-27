@@ -7,8 +7,6 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategie';
 import { User } from './entities/user.entity';
-import { PostsModule } from 'src/posts/posts.module';
-import { CommentsModule } from '../comments/comments.module';
 
 @Module({
     controllers: [AuthController],
@@ -33,13 +31,6 @@ import { CommentsModule } from '../comments/comments.module';
             },
         }),
     ],
-    exports: [
-        TypeOrmModule,
-        JwtStrategy,
-        PassportModule,
-        JwtModule,
-        PostsModule,
-        CommentsModule,
-    ],
+    exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule],
 })
 export class AuthModule {}
