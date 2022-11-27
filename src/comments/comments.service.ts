@@ -14,6 +14,7 @@ import { Comment } from './entities/comment.entity';
 import { handleDBErrors } from 'src/common/helpers/handle-db-errors.helper';
 import { validate as isUUID } from 'uuid';
 import { UnauthorizedException } from '@nestjs/common';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class CommentsService {
@@ -69,8 +70,32 @@ export class CommentsService {
         return comment;
     }
 
-    findAll() {
-        return `This action returns all comments`;
+    async findAll(idPost: string, paginationDto: PaginationDto) {
+        const { limit = 15, offset = 0, term } = paginationDto;
+
+        let comments: Comment[];
+
+        if (!isUUID(idPost)) {
+            throw new BadRequestException(`Id: "${idPost}" must be an UUID`);
+        }
+
+        const queryBuilder =
+            this.commentsRepository.createQueryBuilder('comment');
+        comments = await queryBuilder
+            .where('comment.post.id_post =:id_post', {
+                id_post: idPost,
+            })
+            .take(limit)
+            .skip(offset)
+            .getMany();
+
+        if (!comments.length) {
+            throw new NotFoundException(`Posts not found`);
+        }
+
+        return comments.map((comment) => ({
+            ...comment,
+        }));
     }
 
     async remove(id: string, user: User) {

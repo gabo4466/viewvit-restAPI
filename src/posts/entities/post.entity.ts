@@ -1,6 +1,7 @@
 import { Comment } from 'src/comments/entities/comment.entity';
 import {
     BeforeInsert,
+    BeforeUpdate,
     Column,
     Entity,
     ManyToOne,
@@ -35,6 +36,7 @@ export class Post {
     comments: Comment[];
 
     @BeforeInsert()
+    @BeforeUpdate()
     nullValues() {
         this.lastUpdated = new Date();
     }

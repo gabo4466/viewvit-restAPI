@@ -6,13 +6,15 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { User } from 'src/auth/entities/user.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { isUUID } from 'class-validator';
+import { UnauthorizedException } from '@nestjs/common';
+import { handleDBErrors } from 'src/common/helpers/handle-db-errors.helper';
 
 @Injectable()
 export class PostsService {
@@ -21,6 +23,7 @@ export class PostsService {
     constructor(
         @InjectRepository(Post)
         private readonly postRepository: Repository<Post>,
+        private readonly dataSource: DataSource,
     ) {}
 
     async create(createPostDto: CreatePostDto, user: User) {
@@ -36,7 +39,7 @@ export class PostsService {
 
             return { ...product };
         } catch (error) {
-            this.handleDBExceptions(error);
+            handleDBErrors(error, this.logger);
         }
     }
 
@@ -50,13 +53,24 @@ export class PostsService {
                 take: limit,
                 skip: offset,
                 where: { isDeleted: false },
+                relationLoadStrategy: 'join',
+                relations: {
+                    user: true,
+                },
             });
         } else {
-            posts = await this.postRepository.find({
-                take: limit,
-                skip: offset,
-                where: { isDeleted: false, subject: term },
-            });
+            const queryBuilder = this.postRepository.createQueryBuilder('post');
+            posts = await queryBuilder
+                .where('LOWER(subject) like :subject', {
+                    subject: `%${term.toLowerCase()}%`,
+                })
+                .andWhere('post.isDeleted =:isDeleted', {
+                    isDeleted: false,
+                })
+                .leftJoinAndSelect('post.user', 'postUser')
+                .take(limit)
+                .skip(offset)
+                .getMany();
         }
 
         if (!posts.length && !term) {
@@ -88,24 +102,81 @@ export class PostsService {
         return post;
     }
 
-    // TODO: Update content
-    update(id: number, updatePostDto: UpdatePostDto) {
-        return `This action updates a #${id} post`;
-    }
+    async update(id: string, user: User, updatePostDto: UpdatePostDto) {
+        let post: Post = await this.findOne(id);
 
-    // TODO: Delete post with attribute isDeleted
-    remove(id: number) {
-        return `This action removes a #${id} post`;
-    }
+        const postUpdate = { id_post: post.id_post, ...updatePostDto };
 
-    private handleDBExceptions(error: any) {
-        if (error.code === '23505') {
-            throw new BadRequestException(error.detail);
+        if (post.user.id_user != user.id_user) {
+            throw new UnauthorizedException(
+                `You are not the owner of this post`,
+            );
         }
 
-        this.logger.error(error);
-        throw new InternalServerErrorException(
-            'Unexpected error, check server logs',
-        );
+        const postToUpdate = await this.postRepository.preload(postUpdate);
+
+        if (!postToUpdate) {
+            throw new InternalServerErrorException(`Something went wrong`);
+        }
+        return await this.updatePostTransaction(postToUpdate);
+    }
+
+    async remove(id: string, user: User) {
+        let post: Post = await this.findOne(id);
+
+        if (
+            post.user.id_user != user.id_user &&
+            !user.roles.includes('admin')
+        ) {
+            throw new UnauthorizedException(`You cannot delete this post`);
+        }
+
+        post.isDeleted = true;
+
+        return await this.updatePostTransaction(post);
+    }
+
+    async getUserPosts(idUser: string, paginationDto: PaginationDto) {
+        const { limit = 10, offset = 0, term } = paginationDto;
+
+        let posts: Post[];
+
+        if (!isUUID(idUser)) {
+            throw new BadRequestException(`Id: "${idUser}" must be an UUID`);
+        }
+
+        const queryBuilder = this.postRepository.createQueryBuilder('post');
+        posts = await queryBuilder
+            .where('post.isDeleted =:isDeleted', {
+                isDeleted: false,
+            })
+            .andWhere('post.user.id_user =:id_user', {
+                id_user: idUser,
+            })
+            .take(limit)
+            .skip(offset)
+            .getMany();
+
+        return posts.map((post) => ({
+            ...post,
+        }));
+    }
+
+    private async updatePostTransaction(post: Post) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            await queryRunner.manager.save(post);
+            await queryRunner.commitTransaction();
+            await queryRunner.release();
+
+            return { post };
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            await queryRunner.release();
+            handleDBErrors(error, this.logger);
+        }
     }
 }

@@ -26,24 +26,36 @@ export class PostsController {
     }
 
     @Get()
-    @Auth()
     findAll(@Query() paginationDto: PaginationDto) {
         return this.postsService.findAll(paginationDto);
     }
 
     @Get(':id')
-    @Auth()
     findOne(@Param('id') id: string) {
         return this.postsService.findOne(id);
     }
 
     @Patch(':id')
-    update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-        return this.postsService.update(+id, updatePostDto);
+    @Auth()
+    update(
+        @Param('id') id: string,
+        @Body() updatePostDto: UpdatePostDto,
+        @GetUser() user: User,
+    ) {
+        return this.postsService.update(id, user, updatePostDto);
     }
 
     @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.postsService.remove(+id);
+    @Auth()
+    remove(@Param('id') id: string, @GetUser() user: User) {
+        return this.postsService.remove(id, user);
+    }
+
+    @Get('userPosts/:idUser')
+    getUserPosts(
+        @Param('idUser') idUser: string,
+        @Query() paginationDto: PaginationDto,
+    ) {
+        return this.postsService.getUserPosts(idUser, paginationDto);
     }
 }
