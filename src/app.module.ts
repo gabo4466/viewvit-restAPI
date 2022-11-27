@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { CommentsModule } from './comments/comments.module';
 import { CommonModule } from './common/common.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { CommonModule } from './common/common.module';
         UserModule,
         CommentsModule,
         CommonModule,
+        FilesModule,
     ],
     controllers: [],
     providers: [],

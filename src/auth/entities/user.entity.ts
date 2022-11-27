@@ -46,9 +46,8 @@ export class User {
     @Column('date')
     birthday: Date;
 
-    // TODO: Define default profile photo
     @Column('text', {
-        default: '',
+        default: 'defaultProfile.png',
     })
     profilePhoto: string;
 
@@ -58,6 +57,8 @@ export class User {
     @BeforeInsert()
     @BeforeUpdate()
     checkFields() {
-        this.email = this.email.toLowerCase().trim();
+        if (this.email) {
+            this.email = this.email.toLowerCase().trim();
+        }
     }
 }
