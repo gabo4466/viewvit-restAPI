@@ -8,7 +8,6 @@ import { User } from '../auth/entities/user.entity';
 export class CommentsController {
     constructor(private readonly commentsService: CommentsService) {}
 
-    // TODO: Create comment
     @Post(':id_post')
     @Auth()
     create(
@@ -19,9 +18,11 @@ export class CommentsController {
         return this.commentsService.create(createCommentDto, user, id_post);
     }
 
+    // TODO: GetAll comments from POST paginated
+
     // TODO: Delete comment
     @Delete(':id')
     remove(@Param('id') id: string) {
-        return this.commentsService.remove(+id);
+        return this.commentsService.remove(id);
     }
 }
