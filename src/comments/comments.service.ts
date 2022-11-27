@@ -55,11 +55,16 @@ export class CommentsService {
 
         comment = await this.commentsRepository.findOne({
             where: { id_comment: id },
+            relationLoadStrategy: 'join',
+            relations: {
+                user: true,
+            },
         });
 
         if (!comment) {
             throw new NotFoundException(`Comment with id: "${id}" not found`);
         }
+        console.log({ comment });
 
         return comment;
     }
