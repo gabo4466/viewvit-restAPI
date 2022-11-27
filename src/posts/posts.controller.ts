@@ -50,4 +50,12 @@ export class PostsController {
     remove(@Param('id') id: string, @GetUser() user: User) {
         return this.postsService.remove(id, user);
     }
+
+    @Get('userPosts/:idUser')
+    getUserPosts(
+        @Param('idUser') idUser: string,
+        @Query() paginationDto: PaginationDto,
+    ) {
+        return this.postsService.getUserPosts(idUser, paginationDto);
+    }
 }

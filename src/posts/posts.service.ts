@@ -12,8 +12,9 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { User } from 'src/auth/entities/user.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { equals, isUUID } from 'class-validator';
+import { isUUID } from 'class-validator';
 import { UnauthorizedException } from '@nestjs/common';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class PostsService {
@@ -52,6 +53,10 @@ export class PostsService {
                 take: limit,
                 skip: offset,
                 where: { isDeleted: false },
+                relationLoadStrategy: 'join',
+                relations: {
+                    user: true,
+                },
             });
         } else {
             const queryBuilder = this.postRepository.createQueryBuilder('post');
@@ -62,6 +67,7 @@ export class PostsService {
                 .andWhere('post.isDeleted =:isDeleted', {
                     isDeleted: false,
                 })
+                .leftJoinAndSelect('post.user', 'postUser')
                 .take(limit)
                 .skip(offset)
                 .getMany();
@@ -128,6 +134,32 @@ export class PostsService {
         post.isDeleted = true;
 
         return await this.updatePostTransaction(post);
+    }
+
+    async getUserPosts(idUser: string, paginationDto: PaginationDto) {
+        const { limit = 10, offset = 0, term } = paginationDto;
+
+        let posts: Post[];
+
+        if (!isUUID(idUser)) {
+            throw new BadRequestException(`Id: "${idUser}" must be an UUID`);
+        }
+
+        const queryBuilder = this.postRepository.createQueryBuilder('post');
+        posts = await queryBuilder
+            .where('post.isDeleted =:isDeleted', {
+                isDeleted: false,
+            })
+            .andWhere('post.user.id_user =:id_user', {
+                id_user: idUser,
+            })
+            .take(limit)
+            .skip(offset)
+            .getMany();
+
+        return posts.map((post) => ({
+            ...post,
+        }));
     }
 
     private async updatePostTransaction(post: Post) {
