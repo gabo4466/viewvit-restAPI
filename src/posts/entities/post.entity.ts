@@ -21,6 +21,11 @@ export class Post {
     @Column('date')
     lastUpdated: Date;
 
+    @Column('bool', {
+        default: false,
+    })
+    isDeleted: boolean;
+
     @ManyToOne(() => User, (user) => user.posts, { eager: true })
     user: User;
 
