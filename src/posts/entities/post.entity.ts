@@ -3,6 +3,7 @@ import {
     Column,
     Entity,
     ManyToOne,
+    OneToMany,
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
@@ -26,8 +27,11 @@ export class Post {
     })
     isDeleted: boolean;
 
-    @ManyToOne(() => User, (user) => user.posts, { eager: true })
+    @ManyToOne(() => User, (user) => user.posts, { eager: false })
     user: User;
+
+    @OneToMany(() => Comment, (comment) => comment)
+    comments: Comment[];
 
     @BeforeInsert()
     nullValues() {
