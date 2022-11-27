@@ -37,10 +37,11 @@ export class AuthController {
         return this.authService.updateAccount(updateAccountDto, user);
     }
 
-    // TODO: Get info logged account
     @Get()
     @Auth()
-    getAccount(@GetUser() user: User) {}
+    getAccount(@GetUser() user: User) {
+        return this.authService.getDataAccount(user);
+    }
 
     // TODO: Deactivate account
     @Get()

@@ -103,6 +103,17 @@ export class AuthService {
         }
     }
 
+    async getDataAccount(user: User) {
+        const userData = await this.userRepository.findOneBy({
+            id_user: user.id_user,
+        });
+        if (!userData) {
+            throw new InternalServerErrorException(`Something went wrong`);
+        }
+
+        return userData;
+    }
+
     private getJwtToken(payload: JwtPayload) {
         const token = this.jwtService.sign(payload);
         return token;
