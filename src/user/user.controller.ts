@@ -5,6 +5,15 @@ import { UserService } from './user.service';
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
+    // TODO: Get profile by UUID
     @Get()
     getProfile() {}
+
+    // TODO: Update profile endpoint
+
+    // TODO: Get all && Search
+
+    // TODO: Deactivate account
+
+    // TODO: Ban account
 }

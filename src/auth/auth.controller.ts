@@ -26,10 +26,4 @@ export class AuthController {
     loginUser(@Body() loginUserDto: LoginUserDto) {
         return this.authService.login(loginUserDto);
     }
-
-    @Get('profile')
-    @Auth(ValidRoles.admin)
-    getProfile(@GetUser() user: User) {
-        return 'hola mundo';
-    }
 }

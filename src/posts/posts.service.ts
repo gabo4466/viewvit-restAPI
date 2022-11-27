@@ -37,18 +37,22 @@ export class PostsService {
         }
     }
 
+    // TODO: Get all && SEARCH
     findAll() {
         return `This action returns all posts`;
     }
 
+    // TODO: Get one by UUid
     findOne(id: number) {
         return `This action returns a #${id} post`;
     }
 
+    // TODO: Update content
     update(id: number, updatePostDto: UpdatePostDto) {
         return `This action updates a #${id} post`;
     }
 
+    // TODO: Delete post with attribute isDeleted
     remove(id: number) {
         return `This action removes a #${id} post`;
     }
