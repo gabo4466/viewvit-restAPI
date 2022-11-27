@@ -7,6 +7,7 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from 'src/posts/entities/post.entity';
+import { Comment } from 'src/comments/entities/comment.entity';
 
 @Entity()
 export class User {
@@ -46,18 +47,22 @@ export class User {
     @Column('date')
     birthday: Date;
 
-    // TODO: Define default profile photo
     @Column('text', {
-        default: '',
+        default: 'defaultProfile.png',
     })
     profilePhoto: string;
 
     @OneToMany(() => Post, (post) => post.user)
     posts: Post[];
 
+    @OneToMany(() => Comment, (comment) => comment)
+    comments: Comment[];
+
     @BeforeInsert()
     @BeforeUpdate()
     checkFields() {
-        this.email = this.email.toLowerCase().trim();
+        if (this.email) {
+            this.email = this.email.toLowerCase().trim();
+        }
     }
 }

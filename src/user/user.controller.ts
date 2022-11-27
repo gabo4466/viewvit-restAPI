@@ -1,19 +1,26 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
+import { Auth } from 'src/auth/decorators';
+import { ValidRoles } from 'src/auth/interfaces';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { UserService } from './user.service';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    // TODO: Get profile by UUID
+    @Get(':id')
+    getProfile(@Param('id') id: string) {
+        return this.userService.findOne(id);
+    }
+
     @Get()
-    getProfile() {}
+    findAll(@Query() paginationDto: PaginationDto) {
+        return this.userService.findAll(paginationDto);
+    }
 
-    // TODO: Update profile endpoint
-
-    // TODO: Get all && Search
-
-    // TODO: Deactivate account
-
-    // TODO: Ban account
+    @Delete('ban/:id')
+    @Auth(ValidRoles.admin)
+    banAccount(@Param('id') id: string) {
+        return this.userService.banAccount(id);
+    }
 }

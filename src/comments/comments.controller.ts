@@ -1,30 +1,44 @@
-import { Controller, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+    Controller,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    Get,
+    Query,
+} from '@nestjs/common';
+import { Auth, GetUser } from 'src/auth/decorators';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import { User } from '../auth/entities/user.entity';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('comments')
 export class CommentsController {
     constructor(private readonly commentsService: CommentsService) {}
 
-    // TODO: Create comment
-    @Post()
-    create(@Body() createCommentDto: CreateCommentDto) {
-        return this.commentsService.create(createCommentDto);
-    }
-
-    // TODO: Update comment
-    @Patch(':id')
-    update(
-        @Param('id') id: string,
-        @Body() updateCommentDto: UpdateCommentDto,
+    @Post(':id_post')
+    @Auth()
+    create(
+        @Body() createCommentDto: CreateCommentDto,
+        @GetUser() user: User,
+        @Param('id_post') id_post: string,
     ) {
-        return this.commentsService.update(+id, updateCommentDto);
+        return this.commentsService.create(createCommentDto, user, id_post);
     }
 
+    @Get(':idPost')
+    findAll(
+        @Param('idPost') idPost: string,
+        @Query() paginationDto: PaginationDto,
+    ) {
+        return this.commentsService.findAll(idPost, paginationDto);
+    }
     // TODO: Delete comment
     @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.commentsService.remove(+id);
+    @Auth()
+    remove(@Param('id') id: string, @GetUser() user: User) {
+        return this.commentsService.remove(id, user);
     }
 }
