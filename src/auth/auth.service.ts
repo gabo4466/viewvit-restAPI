@@ -52,12 +52,28 @@ export class AuthService {
             select: {
                 email: true,
                 password: true,
+                isActive: true,
+                isBanned: true,
                 id_user: true,
             },
         });
 
         if (!user || !bcrypt.compareSync(password, user.password)) {
             throw new UnauthorizedException('Credentials are not valid');
+        }
+
+        if (user.isBanned) {
+            throw new UnauthorizedException({
+                code: '0001',
+                msg: `The account is banned`,
+            });
+        }
+
+        if (!user.isActive) {
+            throw new UnauthorizedException({
+                code: '0002',
+                msg: `The account is deactivated`,
+            });
         }
 
         return {
@@ -85,22 +101,7 @@ export class AuthService {
         if (!userToUpdate) {
             throw new InternalServerErrorException(`Something went wrong`);
         }
-        // Create query runner
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-
-        try {
-            await queryRunner.manager.save(userToUpdate);
-            await queryRunner.commitTransaction();
-            await queryRunner.release();
-
-            return { userToUpdate };
-        } catch (error) {
-            await queryRunner.rollbackTransaction();
-            await queryRunner.release();
-            this.handleDBErrors(error);
-        }
+        return await this.updateUserTransaction(userToUpdate);
     }
 
     async getDataAccount(user: User) {
@@ -112,6 +113,29 @@ export class AuthService {
         }
 
         return userData;
+    }
+
+    async deactivateAccount(user: User) {
+        user.isActive = false;
+        return await this.updateUserTransaction(user);
+    }
+
+    private async updateUserTransaction(updateUser: object) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            await queryRunner.manager.save(updateUser);
+            await queryRunner.commitTransaction();
+            await queryRunner.release();
+
+            return { updateUser };
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            await queryRunner.release();
+            this.handleDBErrors(error);
+        }
     }
 
     private getJwtToken(payload: JwtPayload) {

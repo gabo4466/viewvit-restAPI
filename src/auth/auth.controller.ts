@@ -6,6 +6,7 @@ import {
     UseGuards,
     SetMetadata,
     Patch,
+    Delete,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Auth } from './decorators';
@@ -43,8 +44,9 @@ export class AuthController {
         return this.authService.getDataAccount(user);
     }
 
-    // TODO: Deactivate account
-    @Get()
+    @Delete()
     @Auth()
-    deactivateAccount(@GetUser() user: User) {}
+    deactivateAccount(@GetUser() user: User) {
+        return this.authService.deactivateAccount(user);
+    }
 }
