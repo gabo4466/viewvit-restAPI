@@ -1,5 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { Auth } from 'src/auth/decorators';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -11,7 +12,10 @@ export class UserController {
         return this.userService.findOne(id);
     }
 
-    // TODO: Get all && Search
+    @Get()
+    findAll(@Query() paginationDto: PaginationDto) {
+        return this.userService.findAll(paginationDto);
+    }
 
     // TODO: Ban account
 }

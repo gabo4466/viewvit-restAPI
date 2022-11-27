@@ -8,6 +8,7 @@ import { User } from 'src/auth/entities/user.entity';
 import { Repository } from 'typeorm';
 
 import { validate as isUUID } from 'uuid';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class UserService {
@@ -37,5 +38,39 @@ export class UserService {
         }
 
         return user;
+    }
+
+    async findAll(paginationDto: PaginationDto) {
+        const { limit = 10, offset = 0, term } = paginationDto;
+
+        let users: User[];
+
+        if (!term) {
+            users = await this.userRepository.find({
+                take: limit,
+                skip: offset,
+                where: { isBanned: false, isActive: true },
+            });
+        } else {
+            const queryBuilder = this.userRepository.createQueryBuilder('prod');
+            users = await queryBuilder
+                .where('LOWER(nickname) like :nickname', {
+                    nickname: `%${term.toLowerCase()}%`,
+                })
+                .getMany();
+            console.log({ users });
+        }
+
+        if (!users.length && !term) {
+            throw new NotFoundException(`Users not found`);
+        } else if (!users.length && term) {
+            throw new NotFoundException(
+                `Users with nickname: "${term}" not found`,
+            );
+        }
+
+        return users.map((post) => ({
+            ...post,
+        }));
     }
 }
