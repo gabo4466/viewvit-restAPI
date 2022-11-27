@@ -4,4 +4,6 @@
  
  # SET-UP
 
-1.  `docker compose up -d`
+1. Set up docker `docker compose up -d`
+2. Run `yarn install`
+3. Run `yarn run start:dev`
