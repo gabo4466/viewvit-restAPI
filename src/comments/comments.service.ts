@@ -1,11 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+    Injectable,
+    Logger,
+    BadRequestException,
+    NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import { PostsService } from 'src/posts/posts.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { User } from '../auth/entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from './entities/comment.entity';
-import { Repository } from 'typeorm';
 import { handleDBErrors } from 'src/common/helpers/handle-db-errors.helper';
+import { validate as isUUID } from 'uuid';
 
 @Injectable()
 export class CommentsService {
@@ -39,15 +46,28 @@ export class CommentsService {
         return 'This action adds a new comment';
     }
 
+    async findOne(id: string) {
+        let comment: Comment;
+        if (!isUUID(id)) {
+            throw new BadRequestException(`Id: "${id}" must be an UUID`);
+        }
+
+        comment = await this.commentsRepository.findOne({
+            where: { id_comment: id },
+        });
+
+        if (!comment) {
+            throw new NotFoundException(`Comment with id: "${id}" not found`);
+        }
+
+        return comment;
+    }
+
     findAll() {
         return `This action returns all comments`;
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} comment`;
-    }
-
-    remove(id: number) {
+    async remove(id: string) {
         return `This action removes a #${id} comment`;
     }
 }

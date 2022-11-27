@@ -19,10 +19,10 @@ export class Comment {
     @Column('date')
     createdOn: Date;
 
-    @ManyToOne(() => User, (user) => user.comments)
+    @ManyToOne(() => User, (user) => user.comments, { eager: false })
     user: User;
 
-    @ManyToOne(() => Post, (post) => post.comments)
+    @ManyToOne(() => Post, (post) => post.comments, { eager: false })
     post: Post;
 
     @BeforeInsert()
