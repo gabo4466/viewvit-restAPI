@@ -57,7 +57,7 @@ export class UserService {
                 where: { isBanned: false, isActive: true },
             });
         } else {
-            const queryBuilder = this.userRepository.createQueryBuilder('prod');
+            const queryBuilder = this.userRepository.createQueryBuilder('user');
             users = await queryBuilder
                 .where('LOWER(nickname) like :nickname', {
                     nickname: `%${term.toLowerCase()}%`,
