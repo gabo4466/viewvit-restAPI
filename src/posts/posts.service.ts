@@ -3,6 +3,7 @@ import {
     Injectable,
     InternalServerErrorException,
     Logger,
+    NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,6 +11,8 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { User } from 'src/auth/entities/user.entity';
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class PostsService {
@@ -37,14 +40,52 @@ export class PostsService {
         }
     }
 
-    // TODO: Get all && SEARCH
-    findAll() {
-        return `This action returns all posts`;
+    async findAll(paginationDto: PaginationDto) {
+        const { limit = 10, offset = 0, term } = paginationDto;
+
+        let posts: Post[];
+
+        if (!term) {
+            posts = await this.postRepository.find({
+                take: limit,
+                skip: offset,
+                where: { isDeleted: false },
+            });
+        } else {
+            posts = await this.postRepository.find({
+                take: limit,
+                skip: offset,
+                where: { isDeleted: false, subject: term },
+            });
+        }
+
+        if (!posts.length && !term) {
+            throw new NotFoundException(`Posts not found`);
+        } else if (!posts.length && term) {
+            throw new NotFoundException(
+                `Posts with subject: "${term}" not found`,
+            );
+        }
+
+        return posts.map((post) => ({
+            ...post,
+        }));
     }
 
-    // TODO: Get one by UUid
-    findOne(id: number) {
-        return `This action returns a #${id} post`;
+    async findOne(id: string) {
+        let post: Post;
+
+        if (!isUUID(id)) {
+            throw new BadRequestException(`Id: "${id}" must be an UUID`);
+        }
+
+        post = await this.postRepository.findOneBy({ id_post: id });
+
+        if (!post) {
+            throw new NotFoundException(`Post with id: "${id}" not found`);
+        }
+
+        return post;
     }
 
     // TODO: Update content
