@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
 import { Auth } from 'src/auth/decorators';
+import { ValidRoles } from 'src/auth/interfaces';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { UserService } from './user.service';
 
@@ -18,4 +19,9 @@ export class UserController {
     }
 
     // TODO: Ban account
+    @Delete('ban/:id')
+    @Auth(ValidRoles.admin)
+    banAccount(@Param('id') id: string) {
+        return this.userService.banAccount(id);
+    }
 }

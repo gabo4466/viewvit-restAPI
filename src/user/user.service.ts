@@ -1,6 +1,8 @@
 import {
     BadRequestException,
     Injectable,
+    InternalServerErrorException,
+    Logger,
     NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,15 +11,18 @@ import { Repository } from 'typeorm';
 
 import { validate as isUUID } from 'uuid';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { handleDBErrors } from 'src/common/helpers/handle-db-errors.helper';
 
 @Injectable()
 export class UserService {
+    private readonly logger = new Logger('AuthService');
+
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async findOne(id: string) {
+    async findOne(id: string): Promise<User> {
         let user: User;
         if (!isUUID(id)) {
             throw new BadRequestException(`Id: "${id}" must be an UUID`);
@@ -58,7 +63,6 @@ export class UserService {
                     nickname: `%${term.toLowerCase()}%`,
                 })
                 .getMany();
-            console.log({ users });
         }
 
         if (!users.length && !term) {
@@ -69,8 +73,18 @@ export class UserService {
             );
         }
 
-        return users.map((post) => ({
-            ...post,
+        return users.map((user) => ({
+            ...user,
         }));
+    }
+
+    async banAccount(id: string) {
+        const userToDelete = await this.userRepository.preload({ id_user: id });
+        userToDelete.isBanned = true;
+        try {
+            this.userRepository.save(userToDelete);
+        } catch (error) {
+            handleDBErrors(error, this.logger);
+        }
     }
 }

@@ -57,6 +57,8 @@ export class User {
     @BeforeInsert()
     @BeforeUpdate()
     checkFields() {
-        this.email = this.email.toLowerCase().trim();
+        if (this.email) {
+            this.email = this.email.toLowerCase().trim();
+        }
     }
 }

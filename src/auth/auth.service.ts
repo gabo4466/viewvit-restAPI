@@ -13,6 +13,7 @@ import { LoginUserDto, CreateUserDto, UpdateAccountDto } from './dto';
 
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { handleDBErrors } from 'src/common/helpers/handle-db-errors.helper';
 
 @Injectable()
 export class AuthService {
@@ -41,7 +42,7 @@ export class AuthService {
                 }),
             };
         } catch (error) {
-            this.handleDBErrors(error);
+            handleDBErrors(error, this.logger);
         }
     }
 
@@ -134,22 +135,12 @@ export class AuthService {
         } catch (error) {
             await queryRunner.rollbackTransaction();
             await queryRunner.release();
-            this.handleDBErrors(error);
+            handleDBErrors(error, this.logger);
         }
     }
 
     private getJwtToken(payload: JwtPayload) {
         const token = this.jwtService.sign(payload);
         return token;
-    }
-
-    private handleDBErrors(error: any): never {
-        if (error.code === '23505') {
-            this.logger.log(error.detail);
-            throw new BadRequestException(error.detail);
-        } else {
-            this.logger.error(error);
-            throw new InternalServerErrorException('Something went wrong');
-        }
     }
 }
