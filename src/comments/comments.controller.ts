@@ -16,7 +16,7 @@ export class CommentsController {
         @GetUser() user: User,
         @Param('id_post') id_post: string,
     ) {
-        return this.commentsService.create(createCommentDto);
+        return this.commentsService.create(createCommentDto, user, id_post);
     }
 
     // TODO: Delete comment

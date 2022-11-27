@@ -28,7 +28,7 @@ export class Post {
     })
     isDeleted: boolean;
 
-    @ManyToOne(() => User, (user) => user.posts, { eager: true })
+    @ManyToOne(() => User, (user) => user.posts, { eager: false })
     user: User;
 
     @OneToMany(() => Comment, (comment) => comment)
