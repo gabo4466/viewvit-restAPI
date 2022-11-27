@@ -68,6 +68,7 @@ export class CommentsService {
     }
 
     async remove(id: string) {
-        return `This action removes a #${id} comment`;
+        const comment = await this.findOne(id);
+        return await this.commentsRepository.remove(comment);
     }
 }
