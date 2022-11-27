@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { LoginUserDto, CreateUserDto } from './dto';
+import { LoginUserDto, CreateUserDto, UpdateAccountDto } from './dto';
 
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
@@ -66,6 +66,8 @@ export class AuthService {
             }),
         };
     }
+
+    async updateAccount(updateAccountDto: UpdateAccountDto, user: User) {}
 
     private getJwtToken(payload: JwtPayload) {
         const token = this.jwtService.sign(payload);

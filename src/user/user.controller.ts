@@ -1,4 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { Auth } from 'src/auth/decorators';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -10,13 +11,7 @@ export class UserController {
         return this.userService.findOne(id);
     }
 
-    // TODO: Update profile endpoint
-
     // TODO: Get all && Search
 
-    // TODO: Deactivate account
-
     // TODO: Ban account
-
-    // TODO: Account settings
 }

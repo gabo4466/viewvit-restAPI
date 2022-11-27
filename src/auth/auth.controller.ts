@@ -5,11 +5,12 @@ import {
     Get,
     UseGuards,
     SetMetadata,
+    Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Auth } from './decorators';
 import { GetUser } from './decorators/get-user.decorator';
-import { LoginUserDto, CreateUserDto } from './dto';
+import { LoginUserDto, CreateUserDto, UpdateAccountDto } from './dto';
 import { User } from './entities/user.entity';
 import { ValidRoles } from './interfaces/valid-roles.enum';
 
@@ -26,4 +27,21 @@ export class AuthController {
     loginUser(@Body() loginUserDto: LoginUserDto) {
         return this.authService.login(loginUserDto);
     }
+
+    // TODO: Update account (including sensible data)
+    @Patch()
+    @Auth()
+    updateAccount(updateAccountDto: UpdateAccountDto, @GetUser() user: User) {
+        return this.authService.updateAccount(updateAccountDto, user);
+    }
+
+    // TODO: Get info logged account
+    @Get()
+    @Auth()
+    getAccount(@GetUser() user: User) {}
+
+    // TODO: Deactivate account
+    @Get()
+    @Auth()
+    deactivateAccount(@GetUser() user: User) {}
 }
