@@ -1,13 +1,14 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { UserService } from './user.service';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    // TODO: Get profile by UUID
     @Get(':id')
-    getProfile(@Param('id') id: string) {}
+    getProfile(@Param('id') id: string) {
+        return this.userService.findOne(id);
+    }
 
     // TODO: Update profile endpoint
 
@@ -16,4 +17,6 @@ export class UserController {
     // TODO: Deactivate account
 
     // TODO: Ban account
+
+    // TODO: Account settings
 }

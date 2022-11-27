@@ -46,9 +46,8 @@ export class User {
     @Column('date')
     birthday: Date;
 
-    // TODO: Define default profile photo
     @Column('text', {
-        default: '',
+        default: 'defaultProfile.png',
     })
     profilePhoto: string;
 
