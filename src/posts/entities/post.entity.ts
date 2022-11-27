@@ -1,5 +1,7 @@
+import { lastValueFrom } from 'rxjs';
 import {
     BeforeInsert,
+    BeforeUpdate,
     Column,
     Entity,
     ManyToOne,
@@ -30,6 +32,7 @@ export class Post {
     user: User;
 
     @BeforeInsert()
+    @BeforeUpdate()
     nullValues() {
         this.lastUpdated = new Date();
     }

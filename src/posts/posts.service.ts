@@ -6,13 +6,14 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { User } from 'src/auth/entities/user.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { isUUID } from 'class-validator';
+import { equals, isUUID } from 'class-validator';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class PostsService {
@@ -21,6 +22,7 @@ export class PostsService {
     constructor(
         @InjectRepository(Post)
         private readonly postRepository: Repository<Post>,
+        private readonly dataSource: DataSource,
     ) {}
 
     async create(createPostDto: CreatePostDto, user: User) {
@@ -88,14 +90,56 @@ export class PostsService {
         return post;
     }
 
-    // TODO: Update content
-    update(id: number, updatePostDto: UpdatePostDto) {
-        return `This action updates a #${id} post`;
+    async update(id: string, user: User, updatePostDto: UpdatePostDto) {
+        let post: Post = await this.findOne(id);
+
+        const postUpdate = { id_post: post.id_post, ...updatePostDto };
+
+        if (post.user.id_user != user.id_user) {
+            throw new UnauthorizedException(
+                `You are not the owner of this post`,
+            );
+        }
+
+        const postToUpdate = await this.postRepository.preload(postUpdate);
+
+        if (!postToUpdate) {
+            throw new InternalServerErrorException(`Something went wrong`);
+        }
+        return await this.updatePostTransaction(postToUpdate);
     }
 
-    // TODO: Delete post with attribute isDeleted
-    remove(id: number) {
-        return `This action removes a #${id} post`;
+    async remove(id: string, user: User) {
+        let post: Post = await this.findOne(id);
+
+        if (
+            post.user.id_user != user.id_user &&
+            !user.roles.includes('admin')
+        ) {
+            throw new UnauthorizedException(`You cannot delete this post`);
+        }
+
+        post.isDeleted = true;
+
+        return await this.updatePostTransaction(post);
+    }
+
+    private async updatePostTransaction(post: Post) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            await queryRunner.manager.save(post);
+            await queryRunner.commitTransaction();
+            await queryRunner.release();
+
+            return { post };
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            await queryRunner.release();
+            this.handleDBExceptions(error);
+        }
     }
 
     private handleDBExceptions(error: any) {
