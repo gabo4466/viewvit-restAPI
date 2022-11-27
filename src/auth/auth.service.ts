@@ -1,5 +1,4 @@
 import {
-    BadRequestException,
     Injectable,
     InternalServerErrorException,
     Logger,
@@ -118,6 +117,10 @@ export class AuthService {
 
     async deactivateAccount(user: User) {
         user.isActive = false;
+        return await this.updateUserTransaction(user);
+    }
+
+    async updateProfileImage(user: User) {
         return await this.updateUserTransaction(user);
     }
 
