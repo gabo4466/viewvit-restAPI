@@ -18,7 +18,6 @@ export class UserController {
         return this.userService.findAll(paginationDto);
     }
 
-    // TODO: Ban account
     @Delete('ban/:id')
     @Auth(ValidRoles.admin)
     banAccount(@Param('id') id: string) {
