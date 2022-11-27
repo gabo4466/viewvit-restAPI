@@ -54,11 +54,17 @@ export class PostsService {
                 where: { isDeleted: false },
             });
         } else {
-            posts = await this.postRepository.find({
-                take: limit,
-                skip: offset,
-                where: { isDeleted: false, subject: term },
-            });
+            const queryBuilder = this.postRepository.createQueryBuilder('post');
+            posts = await queryBuilder
+                .where('LOWER(subject) like :subject', {
+                    subject: `%${term.toLowerCase()}%`,
+                })
+                .andWhere('post.isDeleted =:isDeleted', {
+                    isDeleted: false,
+                })
+                .take(limit)
+                .skip(offset)
+                .getMany();
         }
 
         if (!posts.length && !term) {
