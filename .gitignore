@@ -3,7 +3,7 @@
 /node_modules
 docker/
 .env
-./static/uploads/
+static/uploads/
 # Logs
 logs
 *.log
