@@ -90,7 +90,7 @@ export class CommentsService {
             .getMany();
 
         if (!comments.length) {
-            throw new NotFoundException(`Posts not found`);
+            throw new NotFoundException(`Comments not found`);
         }
 
         return comments.map((comment) => ({
