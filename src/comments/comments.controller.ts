@@ -1,8 +1,18 @@
-import { Controller, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+    Controller,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    Get,
+    Query,
+} from '@nestjs/common';
 import { Auth, GetUser } from 'src/auth/decorators';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { User } from '../auth/entities/user.entity';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('comments')
 export class CommentsController {
@@ -18,8 +28,13 @@ export class CommentsController {
         return this.commentsService.create(createCommentDto, user, id_post);
     }
 
-    // TODO: GetAll comments from POST paginated
-
+    @Get(':idPost')
+    findAll(
+        @Param('idPost') idPost: string,
+        @Query() paginationDto: PaginationDto,
+    ) {
+        return this.commentsService.findAll(idPost, paginationDto);
+    }
     // TODO: Delete comment
     @Delete(':id')
     remove(@Param('id') id: string) {
