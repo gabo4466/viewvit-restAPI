@@ -22,7 +22,8 @@ export class CommentsController {
 
     // TODO: Delete comment
     @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.commentsService.remove(id);
+    @Auth()
+    remove(@Param('id') id: string, @GetUser() user: User) {
+        return this.commentsService.remove(id, user);
     }
 }

@@ -13,6 +13,7 @@ import { User } from '../auth/entities/user.entity';
 import { Comment } from './entities/comment.entity';
 import { handleDBErrors } from 'src/common/helpers/handle-db-errors.helper';
 import { validate as isUUID } from 'uuid';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class CommentsService {
@@ -67,8 +68,14 @@ export class CommentsService {
         return `This action returns all comments`;
     }
 
-    async remove(id: string) {
+    async remove(id: string, user: User) {
         const comment = await this.findOne(id);
+        if (
+            comment.user.id_user != user.id_user &&
+            !user.roles.includes('admin')
+        ) {
+            throw new UnauthorizedException(`You cannot delete this post`);
+        }
         return await this.commentsRepository.remove(comment);
     }
 }
