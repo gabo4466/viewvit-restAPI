@@ -35,7 +35,7 @@ export class CommentsController {
     ) {
         return this.commentsService.findAll(idPost, paginationDto);
     }
-    // TODO: Delete comment
+
     @Delete(':id')
     @Auth()
     remove(@Param('id') id: string, @GetUser() user: User) {
