@@ -55,6 +55,7 @@ export class AuthService {
                 isActive: true,
                 isBanned: true,
                 id_user: true,
+                nickname: true,
             },
         });
 
