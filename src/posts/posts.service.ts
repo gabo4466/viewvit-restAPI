@@ -30,14 +30,14 @@ export class PostsService {
         try {
             const { ...postDetails } = createPostDto;
 
-            const product = this.postRepository.create({
+            const post = this.postRepository.create({
                 ...postDetails,
                 user,
             });
 
-            await this.postRepository.save(product);
+            await this.postRepository.save(post);
 
-            return { ...product };
+            return { ...post };
         } catch (error) {
             handleDBErrors(error, this.logger);
         }
