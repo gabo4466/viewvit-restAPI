@@ -68,6 +68,7 @@ export class PostsService {
                     isDeleted: false,
                 })
                 .leftJoinAndSelect('post.user', 'postUser')
+                .orderBy('post.lastUpdated', 'DESC')
                 .take(limit)
                 .skip(offset)
                 .getMany();
