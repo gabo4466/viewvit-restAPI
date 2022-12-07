@@ -51,7 +51,7 @@ export class PostsService {
         if (!term) {
             posts = await this.postRepository.find({
                 order: {
-                    lastUpdated: 'ASC',
+                    lastUpdated: 'DESC',
                 },
                 take: limit,
                 skip: offset,
